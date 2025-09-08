@@ -18,7 +18,7 @@
 
 -src folder->create server.ts->app.ts file & app folder
 
--
+- in packange.json file-> script -> add  "dev":"ts-node-dev --respawn --transpile-only .src/server.ts",
 
 # modular mvc pattern
 
@@ -26,3 +26,6 @@
 like:interface,controller,models etc
 
 -app folder->modules folder-> features folder
+
+
+# settings server and app

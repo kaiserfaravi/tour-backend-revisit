@@ -4,6 +4,7 @@
   "description": "-git init\r -.gitignore file create and node_modules insert",
   "main": "index.js",
   "scripts": {
+     "dev":"ts-node-dev --respawn --transpile-only ./src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
