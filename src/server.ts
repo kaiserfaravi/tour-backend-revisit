@@ -28,3 +28,56 @@ startServer()
 // message:"welcome to revisit of my tour backend"
 //     })
 // })
+
+process.on("unhandledRejection",(error)=>{
+    console.log('Unhandled rejection detected,server shutting down',error);
+
+    if(server){
+        server.close(()=>{
+            process.exit(1);
+        })
+    }
+    process.exit(1);
+})
+
+
+// Uncought rejection error
+
+process.on("uncaughtException",(error)=>{
+    console.log('uncought local rejection detected,server shutting down',error);
+
+    if(server){
+        server.close(()=>{
+            process.exit(1);
+        })
+    }
+    process.exit(1);
+})
+
+// sigterm kono cloud platform termination signal dile eta catch korbe
+
+process.on("SIGTERM",()=>{
+    console.log('Sigterm signal recieved,server shutting down');
+
+    if(server){
+        server.close(()=>{
+            process.exit(1);
+        })
+    }
+    process.exit(1);
+})
+
+//forcefully shutdown
+process.on("SIGINT",()=>{
+    console.log('sigint recieved,user forcefully server shutting down');
+
+    if(server){
+        server.close(()=>{
+            process.exit(1);
+        })
+    }
+    process.exit(1);
+})
+
+
+
