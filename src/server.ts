@@ -1,34 +1,22 @@
-import {Server} from 'http'
-import express, { Request, Response } from 'express'
-import mongoose from 'mongoose';
-import app from './app';
+import { Server } from "http"
+import express from "express"
+import mongoose from "mongoose";
+import app from "./app";
+import { envVars } from "./app/config/env";
 
-let server:Server;
-
-// const app = express()
-
-const startServer = async()=>{
-
+let server: Server;
+const startServer = async () => {
     try {
-        await mongoose.connect("mongodb+srv://mongoDB:mongoDB@cluster0.nbhtrh3.mongodb.net/Tour-Revisit?retryWrites=true&w=majority&appName=Cluster0")
-        console.log("connected to DB");
-
-        server = app.listen(5000,()=>{
+        await mongoose.connect(envVars.DB_URL)
+        console.log("connected to db");
+         server = app.listen(envVars.PORT,()=>{
             console.log(`listenining on ${5000}`);
         })
-
     } catch (error) {
-        console.log("server e error pawa gese");
+
     }
 }
 startServer()
-
-// app.get("/",(req:Request,res:Response)=>{
-//     res.status(200).json({
-// message:"welcome to revisit of my tour backend"
-//     })
-// })
-
 process.on("unhandledRejection",(error)=>{
     console.log('Unhandled rejection detected,server shutting down',error);
 
@@ -39,9 +27,6 @@ process.on("unhandledRejection",(error)=>{
     }
     process.exit(1);
 })
-
-
-// Uncought rejection error
 
 process.on("uncaughtException",(error)=>{
     console.log('uncought local rejection detected,server shutting down',error);
@@ -54,7 +39,6 @@ process.on("uncaughtException",(error)=>{
     process.exit(1);
 })
 
-// sigterm kono cloud platform termination signal dile eta catch korbe
 
 process.on("SIGTERM",()=>{
     console.log('Sigterm signal recieved,server shutting down');
