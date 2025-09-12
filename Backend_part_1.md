@@ -122,4 +122,67 @@ const createUser =catchAsync(async(req:Request,res:Response,next:NextFunction)=>
 
 # Send Response Utility Function
  - utils folder -> sendResponse.ts
- - 
+ ```
+ import { Response } from "express";
+
+interface Tmeta{
+    total:number
+}
+
+
+interface TResponse<T>{
+     statusCode:number;
+    success:boolean;
+    message:string;
+    data:T;
+    meta?:Tmeta
+
+}
+
+
+
+export const sendResponse = <T>(res: Response, data: TResponse<T>) => {
+    res.status(data.statusCode).json({
+        statusCode: data.statusCode,
+        success: data.success,
+        message: data.message,
+        meta: data.meta,
+        data: data.data
+    })
+}
+```
+
+# Module 27
+# Zod Validation
+- create and update er somoi zod validation korbe
+- amader j req.body ta ache seta validation and sanitization kore controller e pathiye dibo
+- ekta zod schema banabo ,and zod schema diye req.body k validate korbo
+- schema ta User folder->user.validation.ts e niye jabo code organizing er jonno and export kore dibo
+- ekhon amra ekta validate korar jonno higher order function banabo,jeta return korbe 
+```
+async (req:Request,res:Response,next:NextFunction)=>
+    
+    {
+        req.body = await createUserZodSchema.parseAsync(req.body)
+    }
+```
+- higher Order function ta parameter hisebe zod Object nei
+- ebar register er modde middleware function tar jaigai function ta bosabo and schema ta k call dibo
+` router.post("/register",validateRequest(createUserZodSchema),userControllers.createUser) `
+
+```
+const validateRequest=(zodSchema:ZodObject)=>async (req:Request,res:Response,next:NextFunction)=>
+    
+    {
+        try {
+            req.body = await zodSchema.parseAsync(req.body)
+            next()
+        } catch (error) {
+         next(error)   
+        }
+    }
+```
+
+- ebar HOF ta k middlWare folder->validateRequest.ts -> e insert korbo export kore router e import korbo
+
+ 
