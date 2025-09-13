@@ -185,4 +185,32 @@ const validateRequest=(zodSchema:ZodObject)=>async (req:Request,res:Response,nex
 
 - ebar HOF ta k middlWare folder->validateRequest.ts -> e insert korbo export kore router e import korbo
 
- 
+# hash password
+- install bcryptjs and hashpassword
+`const hashedPassword = await bcryptjs.hash(password as string,10)`
+
+# create login API
+- modules folder->auth folder->auth.route,controller and services file
+```
+const credentialLogIn =async(payload:Partial<IUser>)=>{
+
+    const {email,password}= payload;
+    const isUserExist = await User.findOne({email})
+
+    if(!isUserExist){
+        throw new AppError(httpStatus.BAD_REQUEST,"User not found")
+    }
+    const matchedpassword = await bcryptjs.compare(password as string,isUserExist.password as string)
+
+    if(!matchedpassword){
+        throw new AppError(httpStatus.BAD_REQUEST,"password not matched")
+    }
+
+    return{
+        email:isUserExist.email
+    }
+}
+```
+-  service file e payload theke email password nibo,userExist kore kina email diye db theke find korbo.pawa na gele error asbe,pele password match korbo bcrypt diye,then password bade baki data return kore dibo
+
+- 
