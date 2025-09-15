@@ -213,4 +213,148 @@ const credentialLogIn =async(payload:Partial<IUser>)=>{
 ```
 -  service file e payload theke email password nibo,userExist kore kina email diye db theke find korbo.pawa na gele error asbe,pele password match korbo bcrypt diye,then password bade baki data return kore dibo
 
-- 
+- `  const loginInfo = await AuthServices.credentialLogIn(req.body)`
+- authcontrollers e authService k call kore body ta pathay dibo
+- response e data hisebe loginInfo ta dibo
+
+# JWT 
+- user login->got a token [identitiy]->for using fetures ,will show the token->
+- npm i jsonwebtoken
+- npm i -D @types/jsonwebtoken
+- authservice e email and password jodi match kore amra user k ekta accessToken dite pari
+
+```
+  const jwtPayload ={
+        userId:isUserExist.id,
+        email:isUserExist.email,
+        role:isUserExist.role
+
+    }
+
+    const accessToken = jwt.sign(jwtPayload,"secret",{
+        expiresIn:"1d"
+    })
+ ```
+-  jwt.sign 3ta parameter nei. then auth service e accesstoken ta return kore dibo
+
+# verify token and protect route using middleware
+ - amra all users route ta chai admin and super admin role chara onno kew use korte na paruk.
+ - sejonno ekta middleware use korte hobe,req,res function lagbe,token ta lagbe
+ - `const accessToken = req.headers.authorization` accesstoken ta amra evabe pabo
+ - postman-(get allusers route api)->headers->key[authorization]= value[token]
+ - ` const verifiedToken = jwt.verify(accessToken,"secret")` veriify the token.duita value nibe,accesstoken and secret ta jeta signature e use korsi
+
+
+```
+  try {
+      const accessToken = req.headers.authorization 
+
+      if(!accessToken){
+        throw new AppError(400,'No token')
+      }
+
+    const verifiedToken = jwt.verify(accessToken,"secret") as JwtPayload
+
+     console.log(verifiedToken);
+
+    if(!verifiedToken){
+        throw new AppError(400,"age verify koren")
+    }
+
+    if(verifiedToken.role!== Role.ADMIN || Role.SUPER_ADMIN){
+        throw new AppError(400,"Youre not verified")
+
+    }
+   
+    next()
+  } catch (error) {
+   next(error) 
+  }
+```
+- get all users e header theke request kore authorization theke token nibo.token asche na asche verify korbo,then token verify korbo,jwt import kore,2 taparameter lagbe,()
+- and route ta protected hobe admin and super admin chara kew access kortee parbena .
+- accesstoken er role er sathe interface er role compare korbo,
+
+# Create jwt helpers and check auth middleware
+- acces token generate kora ta means jwt signature ta auth service theke jwt name e utility file e niye jabo and export korbo
+- ```
+import { JwtPayload, SignOptions } from "jsonwebtoken";
+import jwt from 'jsonwebtoken'
+
+export const generateAccessToken=(payload:JwtPayload,secret:string,expiresIn:string)=>{
+
+
+    const accessToken = jwt.sign(payload,secret,{
+        expiresIn
+    } as SignOptions)
+
+    return accessToken
+
+}
+
+
+export const verifyToken =(accessToken:string,secret:string)=>{
+const verifiedToken = jwt.verify(accessToken,secret)
+return verifiedToken
+}```
+- auth service e j signature seta and user route e j router e verified kora hobe setar jonno soho function jwt file e likhbe
+- utils->jwt
+- user route er validation function ta ebar split korte hobe
+- sejonno ekta HOF lagbe
+- checkauth name e fucntion korlam
+- ei function ta direct return kore route protect korar jonno j function ta create korlam se function ta
+- checkAuth er modde Roles gula call kore dibo and HOF e rest operator diye nibo
+
+# checkAuth middleWare and seed superAdmin
+ - middleware folder->checkauth.ts ->replace the checkauth funciton and exports->import in user route ,what we are protecting
+ 
+ ## SEEDING SUPER ADMIN
+  - create email,password in env
+  - utils->seeduperAdmin.ts
+```
+import { email } from "zod"
+import { envVars } from "../config/env"
+import { IAuthProvider, IUser, Role } from "../modules/users/user.interface"
+import { User } from "../modules/users/user.model"
+import bcryptjs from 'bcryptjs'
+
+export const seedSuperAdmin =async()=>{
+
+    try {
+
+        const isSuperAdminExist = await User.findOne({email:envVars.SUPER_ADMIN_EMAIL})
+        if(isSuperAdminExist){
+            console.log("super Admin exist");
+            return
+        }
+
+        const autProviders:IAuthProvider={
+            provider:"credentials",
+            providerId:envVars.SUPER_ADMIN_EMAIL
+        }
+
+        const hashedPassword = await bcryptjs.hash(envVars.SUPER_ADMIN_PASSWORD,Number(envVars.BCRYPT_SALT_ROUND))
+        const payload:IUser = {
+            name:"super admin",
+            role:Role.SUPER_ADMIN,
+            email:envVars.SUPER_ADMIN_EMAIL,
+            password:hashedPassword,
+            isVerified:true,
+            auths:[autProviders]
+        }
+        const superAdmin = await User.create(payload)
+        console.log("super admin created succesfully");
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+call in server in iife
+(async () => {
+    await startServer()
+    await seedSuperAdmin()
+})()
+
+```
+  # update user
+  -  

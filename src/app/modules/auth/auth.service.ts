@@ -1,8 +1,11 @@
+import { envVars } from "../../config/env";
 import AppError from "../../errorHelpers/appError";
+import { generateAccessToken } from "../../utils/jwt";
 import { IUser } from "../users/user.interface"
 import { User } from "../users/user.model";
 import bcryptjs from 'bcryptjs'
 import httpStatus from 'http-status-codes'
+import jwt from 'jsonwebtoken'
 
 const credentialLogIn =async(payload:Partial<IUser>)=>{
 
@@ -18,8 +21,20 @@ const credentialLogIn =async(payload:Partial<IUser>)=>{
         throw new AppError(httpStatus.BAD_REQUEST,"password not matched")
     }
 
+    const jwtPayload ={
+        userId:isUserExist.id,
+        email:isUserExist.email,
+        role:isUserExist.role
+
+    }
+
+    const accessToken = generateAccessToken(jwtPayload,envVars.JWT_ACCESS_SECRET,envVars.JWT_ACCESS_EXPIRES)
+    // const accessToken = jwt.sign(jwtPayload,"secret",{
+    //     expiresIn:"1d"
+    // })
+
     return{
-        email:isUserExist.email
+        accessToken
     }
 }
 
