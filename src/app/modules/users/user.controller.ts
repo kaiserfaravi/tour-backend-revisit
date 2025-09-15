@@ -5,10 +5,15 @@ import { userService } from "./user.service";
 import { promise } from "zod";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
+import { verifyToken } from "../../utils/jwt";
+import { envVars } from "../../config/env";
+import { JwtPayload } from "jsonwebtoken";
 
 
 
 const createUser =catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
+    
+
     const user = await userService.createUser(req.body)
     //  res.status(httpStatus.CREATED).json({
     //         message:"User Created",
@@ -18,6 +23,22 @@ const createUser =catchAsync(async(req:Request,res:Response,next:NextFunction)=>
         success:true,
         statusCode:httpStatus.CREATED,
         message:"User Created Successfully",
+        data:user,
+        
+    })
+
+})
+const updateUser =catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
+    const userId = req.params.userId;
+    const token = req.headers.authorization;
+    const verifiedToken = verifyToken(token as string,envVars.JWT_ACCESS_SECRET) as JwtPayload
+    const payload = req.body;
+    const user = await userService.updateUser(userId,payload,verifiedToken)
+
+    sendResponse(res,{
+        success:true,
+        statusCode:httpStatus.CREATED,
+        message:"User updated Successfully",
         data:user,
         
     })
@@ -60,5 +81,5 @@ const getAllUsers = catchAsync(async(req:Request,res:Response,next:NextFunction)
 })
 
 export const userControllers ={
-    createUser,getAllUsers
+    createUser,getAllUsers,updateUser
 }

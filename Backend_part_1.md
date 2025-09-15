@@ -357,4 +357,54 @@ call in server in iife
 
 ```
   # update user
-  -  
+  ```const updateUser =catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
+    const userId = req.params.userId;
+    const token = req.headers.authorization;
+    const verifiedToken = verifyToken(token as string,envVars.JWT_ACCESS_SECRET) as JwtPayload
+    const payload = req.body;
+    const user = await userService.updateUser(userId,payload,verifiedToken)
+
+    sendResponse(res,{
+        success:true,
+        statusCode:httpStatus.CREATED,
+        message:"User updated Successfully",
+        data:user,
+        
+    })
+
+}) 
+
+const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken: JwtPayload) => {
+
+    const isUserExist = await User.findById(userId)
+
+    if(!isUserExist){
+        throw new AppError(httpStatus.NOT_FOUND,"user Not found");
+    }
+
+    if (payload.role) {
+        if(decodedToken.role === Role.USER || decodedToken.role === Role.GUIDE){
+            throw new AppError(httpStatus.FORBIDDEN,"You Are not authorized")
+        }
+    }
+
+    if(payload.role===Role.SUPER_ADMIN && decodedToken.role === Role.ADMIN){
+        throw new AppError(httpStatus.FORBIDDEN,"You can't promote yourseld")
+    }
+
+    if(payload.isActive || payload.isDeleted || payload.isVerified){
+         if(decodedToken.role === Role.USER || decodedToken.role === Role.GUIDE){
+            throw new AppError(httpStatus.FORBIDDEN,"You Are not authorized")
+        }
+    }
+
+    if(payload.password){
+        payload.password = await bcryptjs.hash(payload.password,Number(envVars.BCRYPT_SALT_ROUND))
+    }
+    const newUpdatedUser = await User.findByIdAndUpdate(userId,payload,{new:true,runValidators:true})
+
+    return newUpdatedUser;
+}
+
+  ``` 
+  - 

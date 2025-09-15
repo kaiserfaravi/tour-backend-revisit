@@ -56,6 +56,8 @@ const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken:
         payload.password = await bcryptjs.hash(payload.password,Number(envVars.BCRYPT_SALT_ROUND))
     }
     const newUpdatedUser = await User.findByIdAndUpdate(userId,payload,{new:true,runValidators:true})
+
+    return newUpdatedUser;
 }
 
 const getAllUser = async () => {
@@ -72,5 +74,5 @@ const getAllUser = async () => {
 }
 
 export const userService = {
-    createUser, getAllUser
+    createUser, getAllUser,updateUser
 }
