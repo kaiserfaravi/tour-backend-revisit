@@ -408,3 +408,15 @@ const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken:
 
   ``` 
   - 
+# add custom property
+ ```
+ import { JwtPayload } from "jsonwebtoken";
+
+declare global{
+    namespace Express{
+interface Request{
+    user:JwtPayload
+}
+    }
+}
+```

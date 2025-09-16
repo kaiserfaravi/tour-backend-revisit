@@ -26,6 +26,7 @@ export const checkAuth =(...authRoles:string[])=>async (req:Request,res:Response
         throw new AppError(400,"Youre not verified")
 
     }
+   req.user=verifiedToken;
    
     next()
   } catch (error) {
