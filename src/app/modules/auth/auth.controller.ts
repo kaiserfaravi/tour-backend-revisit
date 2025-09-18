@@ -1,42 +1,80 @@
-import { NextFunction, Request, Response} from "express"
+import { NextFunction, Request, Response } from "express"
 import { catchAsync } from "../../utils/catchAsync"
 import httpStatus from "http-status-codes"
 import { sendResponse } from "../../utils/sendResponse"
 import { AuthServices } from "./auth.service"
 import AppError from "../../errorHelpers/appError"
+import { setAuthCookies } from "../../utils/setCookie"
 
 
-const credentialLogIn =catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
+const credentialLogIn = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 
 
     const loginInfo = await AuthServices.credentialLogIn(req.body)
+    //  res.cookie('accessToken',loginInfo.accessToken,{
+    //     httpOnly:true,
+    //     secure:false
+    // })
+    // res.cookie('refreshToken',loginInfo.refreshToken,{
+    //     httpOnly:true,
+    //     secure:false
+    // })
 
+    setAuthCookies(res, loginInfo)
 
-     sendResponse(res,{
-        success:true,
-        statusCode:httpStatus.OK,
-        message:"User login succesfully",
-        data:loginInfo,
-        
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "User login succesfully",
+        data: loginInfo,
+
     })
 })
-const getNewAccessToken =catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
+const getNewAccessToken = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 
     const refreshToken = req.cookies.refreshToken;
-    if(!refreshToken){
-        throw new AppError(httpStatus.BAD_REQUEST,"no refresh token recieved");
+    if (!refreshToken) {
+        throw new AppError(httpStatus.BAD_REQUEST, "no refresh token recieved");
     }
-    const tokenInfo = await AuthServices.getNewAccessToken(refreshToken)
+    const tokenInfo = await AuthServices.getNewAccessToken(refreshToken as string) 
 
 
-     sendResponse(res,{
-        success:true,
-        statusCode:httpStatus.OK,
-        message:"User login succesfully",
-        data:tokenInfo,
-        
+    // res.cookie('accessToken', tokenInfo.accessToken, {
+    //     httpOnly: true,
+    //     secure: false
+    // })
+setAuthCookies(res, tokenInfo)
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "new access Token retrived  succesfully",
+        data: tokenInfo,
+
     })
 })
-export const AuthControllers={
-    credentialLogIn,getNewAccessToken
+const logOut = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+   
+    res.clearCookie('accessToken',{
+        httpOnly:true,
+        secure:false,
+        sameSite:"lax"
+    })
+    res.clearCookie('refreshToken',{
+        httpOnly:true,
+        secure:false,
+        sameSite:"lax"
+    })
+   
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "User logged out succesfully",
+        data: null,
+
+    })
+})
+export const AuthControllers = {
+    credentialLogIn, getNewAccessToken,logOut
 }

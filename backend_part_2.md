@@ -61,6 +61,38 @@ const getNewAccessToken =catchAsync(async(req:Request,res:Response,next:NextFunc
 })
 ```
 
-# 
+# set the access token and refresh token in cookies
+
 - login korar somoi j refresh token ta pai seta cookie te set korte hobe
-- 
+```
+ res.cookie('refreshToen',loginInfo.refreshToken,{
+        httpOnly:true,
+        secure:false
+    })
+
+```
+- npm i cookie-parser and types
+- token releted sob code ekta utility function e rekhe dilam
+
+- cookie login korar somoi access token new refresh token set korar pore abar jokhon newly set korbe ,jeno purono ta theke na jai sejonnno get new access token e abar set kore dite hobe
+  
+  - utility->setCookie.ts
+
+  # implement log out
+  
+  ```
+   res.clearCookie('accessToken',{
+        httpOnly:true,
+        secure:false,
+        sameSite:"lax"
+    })
+    res.clearCookie('refreshToken',{
+        httpOnly:true,
+        secure:false,
+        sameSite:"lax"
+    })
+
+  ```
+
+ # implement password change/reset
+  
