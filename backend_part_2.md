@@ -95,4 +95,8 @@ const getNewAccessToken =catchAsync(async(req:Request,res:Response,next:NextFunc
   ```
 
  # implement password change/reset
-  
+   - chech codes
+ 
+ # passport js/third party authentication
+  - google cloud->
+

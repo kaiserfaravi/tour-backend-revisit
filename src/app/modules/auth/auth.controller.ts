@@ -5,6 +5,7 @@ import { sendResponse } from "../../utils/sendResponse"
 import { AuthServices } from "./auth.service"
 import AppError from "../../errorHelpers/appError"
 import { setAuthCookies } from "../../utils/setCookie"
+import { JwtPayload } from "jsonwebtoken"
 
 
 const credentialLogIn = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -75,6 +76,23 @@ const logOut = catchAsync(async (req: Request, res: Response, next: NextFunction
 
     })
 })
+const resetPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+   
+  const newPassword = req.body.newPassword;
+  const oldPassWord = req.body.oldPassWord;
+  const decodedToken = req.user 
+
+   await AuthServices.resetPassword(oldPassWord,newPassword,decodedToken )
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "password changed succesfully",
+        data: null,
+
+    })
+})
 export const AuthControllers = {
-    credentialLogIn, getNewAccessToken,logOut
+    credentialLogIn, getNewAccessToken,logOut,resetPassword
 }
