@@ -126,5 +126,85 @@ app.use(expressSession({
 
 
 
-- config->passsport.ts 
-- 
+- config->passsport.ts file
+```
+import passport from "passport";
+import { envVars } from "./env";
+import { Strategy as GoogleStrategy, Profile, VerifyCallback} from "passport-google-oauth20";
+import { User } from "../modules/users/user.model";
+import { Role } from "../modules/users/user.interface";
+
+passport.use(
+    new GoogleStrategy({
+        clientID:envVars.GOOGLE_CLIENT_ID,
+        clientSecret:envVars.GOOGLE_CLIENT_SECRET,
+        callbackURL:envVars.GOOGLE_CALLBACK_URL
+    },async(accessToken:string,refreshToken:string,profile:Profile,done:VerifyCallback)=>{
+
+         try {
+            const email = profile.emails?.[0].value;
+
+            if(!email){
+                return done(null,false,{message:"No Email Found"})
+            }
+            let user = await User.findOne({email})
+            if(!user){
+                user = await User.create({
+                    email,
+                    name:profile.displayName,
+                    picture:profile.photos?.[0].value,
+                    role:Role.USER,
+                    isVerified:true,
+                    auths:[
+                        {
+                            provider:"google",
+                            providerId:profile.id
+                        }
+                    ]
+                })
+
+            }
+            return done(null,user)
+
+         } catch (error) {
+            console.log("google error",error);
+            return done(error)
+         }
+    })
+)
+
+
+```
+- google authentication by passport done
+- now create the api
+- get route banacchi karon google er maddome authentication ta korchi,body te kichu dicchina
+- then ekta callback fnction hobe
+```
+router.get('/google',async(req:Request,res:Response,next:NextFunction)=>{
+    passport.authenticate("google",{scope:["profile","email"]})(req,res,next)
+})
+```
+- jokhon google login hobe ekta callback url e pathiye dibe `router.get('/google/callback',AuthControllers.googleCallBackControllers)`
+
+```
+const googleCallBackControllers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+
+    const user = req.user;
+    if(!user){
+        throw new AppError(httpStatus.BAD_REQUEST,"user not found")
+    }
+    const tokenInfo =  createUserToken(user)
+
+    setAuthCookies(res,tokenInfo)
+
+    res.redirect(envVars.FRONTEND_URL)
+
+})
+```
+- serialize and deserialize the passport.ts
+- passort.ts configure korechi but express.ja kichui jane na,so configure file ta sekhane import kora lagbe
+- import './app/config/passport' in app.ts
+- and router e `router.get('/google/callback',passport.authenticate('google',{failureRedirect:"/login"}),AuthControllers.googleCallBackControllers)`
+
+# 
