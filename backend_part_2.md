@@ -123,15 +123,7 @@ app.use(expressSession({
     saveUninitialized:false
 }))
 ```
-- GOOGLE_CLIENT_ID =688545328813-nc7t4ekbd22m6tv69mp316ettjvnklri.apps.googleusercontent.com
-- GOOGLE_CLIENT_SECRET =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
-- GOOGLE_CALLBACK_URL =http://localhost:5000/api/v1/auth/google/GOOGLE_CALLBACK_URL
 
-- EXPRESS_SESSION_SECRET
-- EXPRESS_SESSION_SECRET =express_session 
-
-- #frontend_url
-- FRONTEND_URL=http://localhost:5173
 
 
 - config->passsport.ts 
