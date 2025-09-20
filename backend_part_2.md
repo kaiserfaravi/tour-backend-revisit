@@ -207,4 +207,7 @@ const googleCallBackControllers = catchAsync(async (req: Request, res: Response,
 - import './app/config/passport' in app.ts
 - and router e `router.get('/google/callback',passport.authenticate('google',{failureRedirect:"/login"}),AuthControllers.googleCallBackControllers)`
 
-# 
+# redirect users to desired route
+ - '/google' er modde hit korar pore amra ekta query pabo.seta state e rakhbe passport and callbackk e patabe 
+ - and chaile state ta k ami controller e rcv korte pari
+ - 

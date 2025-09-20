@@ -98,6 +98,10 @@ const resetPassword = catchAsync(async (req: Request, res: Response, next: NextF
 const googleCallBackControllers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 
 
+    let state = req.query.state?req.query.state as string :'';
+    if(state.startsWith('/')){
+        state=state.slice(1)
+    }
     const user = req.user;
     console.log("user",user);
     if(!user){
@@ -107,7 +111,8 @@ const googleCallBackControllers = catchAsync(async (req: Request, res: Response,
 
     setAuthCookies(res,tokenInfo)
 
-    res.redirect(envVars.FRONTEND_URL)
+    res.redirect(`${envVars.FRONTEND_URL}/${state}`)
+    // state=redirectTo
 
 })
 export const AuthControllers = {
